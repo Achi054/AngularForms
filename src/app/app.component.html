@@ -1,28 +1,18 @@
-# Angular forms
-
-- Template driven forms
-  Heavy on form templates
-
-- Reactive forms
-  Heavy on model class
-
-# Template driven forms
-
-- Easy to use as in AngularJS
-- Two way data binding ngModel
-- Bulky HTML and minimal component code
-- Form event is handled in
-- Unit testing is a challenge
-- Suitable for simple scenarios
-
-In the below example I have used `Template Reference` to get `ngForm` directive and `userForm.value` gives the object reference.
-
-```
-<form #userForm="ngForm">
+<div class="container-fluid">
+  <h1>Bootcamp enrollment form</h1>
+  <form #userForm="ngForm">
     {{userForm.value | json}}
     <div class="form-group">
       <label>Name</label>
       <input type="text" class="form-control" name="userName" ngModel />
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" class="form-control" name="email" ngModel />
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" class="form-control" name="phone" ngModel />
     </div>
     <div>
       <div class="form-group">
@@ -32,6 +22,14 @@ In the below example I have used `Template Reference` to get `ngForm` directive 
       <div class="form-group">
         <label>City</label>
         <input type="text" class="form-control" name="city" ngModel>
+      </div>
+      <div class="form-group">
+        <label>State</label>
+        <input type="text" class="form-control" name="state" ngModel>
+      </div>
+      <div class="form-group">
+        <label>Postal Code</label>
+        <input type="text" class="form-control" name="postalCode" ngModel>
       </div>
     </div>
     <div class="form-group">
@@ -61,4 +59,3 @@ In the below example I have used `Template Reference` to get `ngForm` directive 
     <button class="btn btn-primary" type="submit">Submit</button>
   </form>
 </div>
-```
