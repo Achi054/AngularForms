@@ -318,3 +318,108 @@ For this we will be using node `Express server` with `body-parser` and `cors`
 - Custom form validation
 - Dynamic validation
 - Unit test
+
+## Component template and model binding
+
+```
+HTML:
+<form [formGroup]="registrationForm">
+  <div class="form-group">
+    <label>User Name</label>
+    <input type="text" formControlName="userName" class="form-control" />
+  </div>
+  <div formGroupName="address">
+    <div class="form-group">
+      <label>Country</label>
+      <input type="text" formControlName="country" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label>Country Code</label>
+      <input type="text" formControlName="countryCode" class="form-control" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" formControlName="password" class="form-control" />
+  </div>
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <input type="password" formControlName="confirmPassword" class="form-control" />
+  </div>
+  <button class="btn btn-primary" type="submit">Register</button>
+  {{registrationForm.value | json}}
+</form>
+
+Model:
+registrationForm = this.fb.group({
+    userName: [''],
+    address: this.fb.group({
+      country: [''],
+      countryCode: ['']
+    }),
+    password: [''],
+    confirmPassword: ['']
+  });
+```
+
+Import `FormBuilder` from `@angular/forms`
+
+# Bind control values
+
+```
+HTML:
+<button class="m-1 btn btn-primary" type="submit">Register</button>
+<button class="m-1 btn btn-dark" type="button" (click)='loadData()'>Load Data</button>
+<button class="m-1 btn btn-dark" type="button" (click)='loadPartialData()'>Load Partial Data</button>
+
+Component:
+loadData() {
+  this.registrationForm.setValue({
+    userName: 'Sujith',
+    password: 'sujith',
+    confirmPassword: 'sujith',
+    address: {
+      country: 'India',
+      countryCode: '+91'
+    }
+  });
+}
+
+loadPartialData() {
+  this.registrationForm.patchValue({
+    userName: 'Sujith',
+    password: 'sujith',
+    confirmPassword: 'sujith'
+  });
+}
+```
+
+`setValue` sets values for all the property in the model, `patchValue` sets value for subset properties
+
+# Simple validation
+
+```
+HTML:
+<div class="form-group">
+  <label>User Name</label>
+  <input type="text" [class.is-invalid]='userName.invalid && userName.touched' formControlName="userName"
+    class="form-control" />
+  <div *ngIf='userName.valid || userName.touched'>
+    <small class="text-danger" *ngIf="!!userName.errors?.required">User name is required</small>
+    <small class="text-danger" *ngIf="!!userName.errors?.minlength">User name should be atleast 3 characters</small>
+  </div>
+</div>
+
+Component:
+registrationForm = this.fb.group({
+  userName: ['', [Validators.required, Validators.minLength(3)]],
+  address: this.fb.group({
+    country: [''],
+    countryCode: ['']
+  }),
+  password: [''],
+  confirmPassword: ['']
+});
+```
+
+Import `Validator` from `@angular/forms`
