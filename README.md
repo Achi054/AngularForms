@@ -423,3 +423,118 @@ registrationForm = this.fb.group({
 ```
 
 Import `Validator` from `@angular/forms`
+
+## Custom validator
+  ```
+  Create file text.validator.ts
+
+  export function forbiddenTextValidator(expression: RegExp): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      const forbiddenText = expression.test(control.value);
+      return forbiddenText ? { 'forbiddenValue': { value: control.value }} : null;
+    };
+  }
+
+  Component:
+  registrationForm = this.fb.group({
+    userName: ['', [Validators.required, Validators.minLength(3), forbiddenTextValidator(/password/)]],
+    address: this.fb.group({
+      country: [''],
+      countryCode: ['']
+    }),
+    password: [''],
+    confirmPassword: ['']
+  });
+
+  HTML:
+  <form [formGroup]="registrationForm">
+    <div class="form-group">
+      <label>User Name</label>
+      <input type="text" [class.is-invalid]='userName.invalid && userName.touched' formControlName="userName"
+        class="form-control" />
+      <div *ngIf='userName.valid || userName.touched'>
+        <small class="text-danger" *ngIf="!!userName.errors?.required">User name is required</small>
+        <small class="text-danger" *ngIf="!!userName.errors?.minlength">User name should be atleast 3 characters</small>
+        <small class="text-danger" *ngIf="!!userName.errors?.forbiddenValue">Cannot use name {{userName.errors?.forbiddenValue.value}}</small>
+      </div>
+    </div>
+  </form>
+  ```
+  Import `AbstractControl` & `ValidatorFn` from `@angular/forms`;
+
+## Cross field validation
+  ```
+  Create file passwordMatch.validator.ts
+
+  export function passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+
+    if (password.pristine || confirmPassword.pristine) {
+      return null;
+    }
+
+    return (password && confirmPassword && password.value !== confirmPassword.value)
+      ? { 'misMatch': true } : null;
+  }
+
+  Component:
+  registrationForm = this.fb.group({
+    userName: ['', [Validators.required, Validators.minLength(3), forbiddenTextValidator(/password/)]],
+    address: this.fb.group({
+      country: [''],
+      countryCode: ['']
+    }),
+    password: [''],
+    confirmPassword: ['']
+  }, { validator: passwordMatchValidator });
+
+  HTML:
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <input type="password" [class.is-invalid]='!!password.errors?.misMatch' formControlName="confirmPassword" class="form-control" />
+    <small class="text-danger" *ngIf="!!password.errors?.misMatch">Password does not match</small>
+  </div>
+  ```
+
+## Conditional validation
+
+  ```
+  HTML:
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" [class.is-invalid]='email.invalid && email.touched' formControlName="email" class="form-control" />
+    <small class="text-danger" [class.d-none]="email.valid || email.untouched">Email is missing</small>
+  </div>
+  <div class="form-group mb-3">
+    <input type="checkbox" formControlName="subscribe" class="form-check-input">
+    <label class="form-check-label">Send promotional email</label>
+  </div>
+
+  Component:
+  ngOnInit() {
+    this.registrationForm = this.fb.group({
+      userName: ['', [Validators.required, Validators.minLength(3), forbiddenTextValidator(/password/)]],
+      address: this.fb.group({
+        country: [''],
+        countryCode: ['']
+      }),
+      email: [''],
+      subscribe: [false],
+      password: [''],
+      confirmPassword: ['']
+    }, { validator: passwordMatchValidator });
+
+    this.registrationForm.get('subscribe').valueChanges
+      .subscribe(checked => {
+        const email = this.registrationForm.get('email');
+        if(checked) {
+          email.setValidators(Validators.required);
+        }
+        else{
+          email.clearValidators();
+        }
+        email.updateValueAndValidity();
+      });
+  }
+  ```
